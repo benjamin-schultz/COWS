@@ -5,35 +5,21 @@
 #include <ESP8266WebServer.h>
 #include "WiFiManager.h"         //https://github.com/tzapu/WiFiManager
 
-#include <ESP8266mDNS.h>
-
 #include <uri/UriBraces.h>
 
-std::unique_ptr<ESP8266WebServer> server;
+ESP8266WebServer server(80);
 
-void handleRoot() {
-  server->send(200, "text/plain", "hello from esp8266!");
-}
-
-void handleNotFound() {
-  String message = "File Not Found\n\n";
-  message += "URI: ";
-  message += server->uri();
-  message += "\nMethod: ";
-  message += (server->method() == HTTP_GET) ? "GET" : "POST";
-  message += "\nArguments: ";
-  message += server->args();
-  message += "\n";
-  for (uint8_t i = 0; i < server->args(); i++) {
-    message += " " + server->argName(i) + ": " + server->arg(i) + "\n";
-  }
-  server->send(404, "text/plain", message);
+void handleDuration() {
+  String duration = server.pathArg(0);
+  server.send(200, "text/plain", "it worked: " + duration);
 }
 
 void setup() {
-  // put your setup code here, to run once:
+
+  pinMode(0, OUTPUT);
+
   Serial.begin(115200);
-  //Serial.setDebugOutput(true);
+
   //WiFiManager
   //Local intialization. Once its business is done, there is no need to keep it around
   WiFiManager wifiManager;
@@ -46,49 +32,18 @@ void setup() {
   //and goes into a blocking loop awaiting configuration
   //wifiManager.autoConnect("AutoConnectAP");
   //or use this for auto generated name ESP + ChipID
-  wifiManager.autoConnect();
-
+  wifiManager.autoConnect("COWS", "cowsgomoo");
 
   //if you get here you have connected to the WiFi
   Serial.println("connected...yeey :)");
-  
-  server.reset(new ESP8266WebServer(WiFi.localIP(), 80));
 
-  if (MDNS.begin("esp8266")) {
-    Serial.println("MDNS responder started");
-  }
+  server.on(UriBraces("/duration={}"), handleDuration);
 
-  server->on("/", handleRoot);
-
-  server->on("/inline", []() {
-    server->send(200, "text/plain", "this works as well");
-  });
-
-
-  pinMode(0, OUTPUT);
-  server->on("/LED=ON", []() {
-    digitalWrite(0, LOW);
-    server->send(200, "text/plain", "LED is on!");
-  });
-
-  server->on("/LED=OFF", []() {
-    digitalWrite(0, HIGH);
-    server->send(200, "text/plain", "LED is off!");
-  });
-
-  server->on(UriBraces("/duration={}"), []() {
-    String duration = server->pathArg(0);
-    server->send(200, "text/plain", "it worked: " + duration);
-  });
-
-  server->onNotFound(handleNotFound);
-
-  server->begin();
+  server.begin();
   Serial.println("HTTP server started");
   Serial.println(WiFi.localIP());
 }
 
 void loop() {
-  // put your main code here, to run repeatedly:
-  server->handleClient();
+  server.handleClient();
 }
