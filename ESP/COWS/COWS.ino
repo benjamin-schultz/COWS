@@ -5,6 +5,10 @@
 #include <ESP8266WebServer.h>
 #include "WiFiManager.h"         //https://github.com/tzapu/WiFiManager
 
+#include <ESP8266mDNS.h>
+
+#include <uri/UriBraces.h>
+
 std::unique_ptr<ESP8266WebServer> server;
 
 void handleRoot() {
@@ -50,6 +54,10 @@ void setup() {
   
   server.reset(new ESP8266WebServer(WiFi.localIP(), 80));
 
+  if (MDNS.begin("esp8266")) {
+    Serial.println("MDNS responder started");
+  }
+
   server->on("/", handleRoot);
 
   server->on("/inline", []() {
@@ -66,6 +74,11 @@ void setup() {
   server->on("/LED=OFF", []() {
     digitalWrite(0, HIGH);
     server->send(200, "text/plain", "LED is off!");
+  });
+
+  server->on(UriBraces("/duration={}"), []() {
+    String duration = server->pathArg(0);
+    server->send(200, "text/plain", "it worked: " + duration);
   });
 
   server->onNotFound(handleNotFound);
