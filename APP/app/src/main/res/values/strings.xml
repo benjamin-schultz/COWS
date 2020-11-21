@@ -1,3 +1,7 @@
 <resources>
     <string name="app_name">COWS</string>
+    <string name="duration">Watering Duration (s)</string>
+    <string name="water">WATER!</string>
+    <string name="defaultstate">Waiting to water...</string>
+    <string name="full_name">Chucky\'s Online Watering System</string>
 </resources>
