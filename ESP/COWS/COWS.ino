@@ -9,12 +9,14 @@
 
 ESP8266WebServer server(80);
 
+#define MOTOR_PIN 0
+
 void handleDuration() {
   int duration = server.pathArg(0).toInt();
   server.send(200, "text/plain", "Watering for " + String(duration) + " seconds");
-  digitalWrite(0, LOW);
+  digitalWrite(MOTOR_PIN, LOW);
   delay(duration * 1000);
-  digitalWrite(0, HIGH);
+  digitalWrite(MOTOR_PIN, HIGH);
 }
 
 void setup() {
