@@ -21,7 +21,7 @@ void handleDuration() {
 
 void setup() {
 
-  pinMode(0, OUTPUT);
+  pinMode(MOTOR_PIN, OUTPUT);
 
   Serial.begin(115200);
 
