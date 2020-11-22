@@ -2,6 +2,7 @@ package com.example.cows;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Intent;
 import android.os.Bundle;
 import android.text.Editable;
 import android.view.View;
@@ -49,5 +50,10 @@ public class MainActivity extends AppCompatActivity {
 
             queue.add(stringRequest);
         }
+    }
+
+    public void startSetup(View view) {
+        Intent intent = new Intent(this, SetupActivity.class);
+        startActivity(intent);
     }
 }

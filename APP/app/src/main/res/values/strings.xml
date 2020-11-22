@@ -4,4 +4,16 @@
     <string name="water">WATER!</string>
     <string name="defaultstate">Waiting to water...</string>
     <string name="full_name">Chucky\'s Online Watering System</string>
+    <string name="setup">Setup</string>
+    <string name="change_wifi">Connect to the COWS wifi. Password is: cowsgomoo</string>
+    <string name="scan_for_wifi">Click Configure Wifi, pick your Wifi and type in your password</string>
+    <string name="ip_leadin">Enter the following:</string>
+    <string name="staticIPHeader">Static IP:</string>
+    <string name="defaultIP">1.1.1.1</string>
+    <string name="staticGatewayHeader">Static Gateway:</string>
+    <string name="subnetHeader">Subnet:</string>
+    <string name="followWifiHeader">Aftering you finish reading, click the \"Log In\" below</string>
+    <string name="login">Log In</string>
+    <string name="subnet">255.255.255.0</string>
+    <string name="wifi_settings">Wifi Settings</string>
 </resources>
