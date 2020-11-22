@@ -2,7 +2,9 @@ package com.example.cows;
 
 import androidx.appcompat.app.AppCompatActivity;
 
+import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.net.DhcpInfo;
 import android.net.InetAddresses;
 import android.net.Uri;
@@ -20,6 +22,8 @@ import java.text.Format;
 
 public class SetupActivity extends AppCompatActivity {
 
+    String newIp;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,16 +36,23 @@ public class SetupActivity extends AppCompatActivity {
         WifiInfo info = wifiManager.getConnectionInfo();
         String ipAddress = Formatter.formatIpAddress(info.getIpAddress());
         String ipFirstThree = ipAddress.substring(0, ipAddress.lastIndexOf("."));
-        String newIp = ipFirstThree + ".250";
+        newIp = ipFirstThree + ".250";
         ipText.setText(newIp);
 
         DhcpInfo dhcpInfo = wifiManager.getDhcpInfo();
         String gateway = Formatter.formatIpAddress(dhcpInfo.gateway);
         gatewayText.setText(gateway);
+
+
     }
 
     public void onLogIn(View view) {
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://192.168.86.25/"));
+        SharedPreferences sharedPref = SetupActivity.this.getSharedPreferences(getString(R.string.pref_file), Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(getString(R.string.ip_address), newIp);
+        editor.apply();
+
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://192.168.5.20/"));
         startActivity(browserIntent);
     }
 

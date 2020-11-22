@@ -30,11 +30,12 @@ void setup() {
   WiFiManager wifiManager;
   wifiManager.resetSettings();
 
-  IPAddress _ip = IPAddress(192, 168, 86, 25);
+  IPAddress _ip = IPAddress(192, 168, 5, 20);
   IPAddress _gw = IPAddress(192, 168, 86, 1);
   IPAddress _sn = IPAddress(255, 255, 255, 0);
 
   wifiManager.setAPStaticIPConfig(_ip, _gw, _sn);
+
   wifiManager.setSTAStaticIPConfig(_ip, _gw, _sn);
 
   //fetches ssid and pass from eeprom and tries to connect
