@@ -10,8 +10,11 @@
 ESP8266WebServer server(80);
 
 void handleDuration() {
-  String duration = server.pathArg(0);
-  server.send(200, "text/plain", "it worked: " + duration);
+  int duration = server.pathArg(0).toInt();
+  server.send(200, "text/plain", "Watering for " + String(duration) + " seconds");
+  digitalWrite(0, LOW);
+  delay(duration * 1000);
+  digitalWrite(0, HIGH);
 }
 
 void setup() {
@@ -23,15 +26,17 @@ void setup() {
   //WiFiManager
   //Local intialization. Once its business is done, there is no need to keep it around
   WiFiManager wifiManager;
-  //reset saved settings
   wifiManager.resetSettings();
+
+  IPAddress _ip = IPAddress(192, 168, 86, 25);
+  IPAddress _gw = IPAddress(192, 168, 86, 1);
+  IPAddress _sn = IPAddress(255, 255, 255, 0);
+
+  wifiManager.setAPStaticIPConfig(_ip, _gw, _sn);
+  wifiManager.setSTAStaticIPConfig(_ip, _gw, _sn);
 
   //fetches ssid and pass from eeprom and tries to connect
   //if it does not connect it starts an access point with the specified name
-  //here  "AutoConnectAP"
-  //and goes into a blocking loop awaiting configuration
-  //wifiManager.autoConnect("AutoConnectAP");
-  //or use this for auto generated name ESP + ChipID
   wifiManager.autoConnect("COWS", "cowsgomoo");
 
   //if you get here you have connected to the WiFi
