@@ -2,6 +2,7 @@
 #include <TinyUPnP.h>
 #include <ESP8266mDNS.h>
 #include <WiFiUdp.h>
+#include <EasyDDNS.h>
 
 //needed for library
 #include <DNSServer.h>
@@ -10,13 +11,15 @@
 
 #include <uri/UriBraces.h>
 
-#define LISTEN_PORT 6665
+#define LISTEN_PORT 1250
 #define LEASE_DURATION 36000
 #define FRIENDLY_NAME "COWS"
 #define MOTOR_PIN 0
+#define DDNS_NAME "cows-for-yy.duckdns.org"
 
 TinyUPnP tinyUPnP(20000);
 ESP8266WebServer server(LISTEN_PORT);
+DNSServer dnsServer;
 
 void handleDuration() {
   
@@ -25,6 +28,33 @@ void handleDuration() {
   digitalWrite(MOTOR_PIN, LOW);
   delay(duration * 1000);
   digitalWrite(MOTOR_PIN, HIGH);
+}
+
+void setupWiFi() {
+  //WiFiManager
+  //Local intialization. Once its business is done, there is no need to keep it around
+  WiFiManager wifiManager;
+  delay(5000);
+  if (digitalRead(MOTOR_PIN) == 0) { 
+    wifiManager.resetSettings();
+  }
+
+  pinMode(MOTOR_PIN, OUTPUT);
+  
+  IPAddress _ip = IPAddress(192, 168, 5, 20);
+  IPAddress _gw = IPAddress(192, 168, 5, 1);
+  IPAddress _sn = IPAddress(255, 255, 255, 0);
+
+  wifiManager.setAPStaticIPConfig(_ip, _gw, _sn);
+
+  //fetches ssid and pass from eeprom and tries to connect
+  //if it does not connect it starts an access point with the specified name
+  wifiManager.autoConnect("COWS", "cowsgomoo");
+
+  //if you get here you have connected to the WiFi
+  Serial.println("Connected to Wifi :)");
+
+  Serial.println(WiFi.localIP());
 }
 
 void setupUPnP() {
@@ -44,43 +74,18 @@ void setupUPnP() {
   Serial.println("UPnP done");
 }
 
-void setup() {
-
-  pinMode(MOTOR_PIN, INPUT);
-
-  Serial.begin(115200);
-
-  //WiFiManager
-  //Local intialization. Once its business is done, there is no need to keep it around
-  WiFiManager wifiManager;
-  delay(5);
-  if (MOTOR_PIN == 0) { 
-    wifiManager.resetSettings();
-  }
-
-  pinMode(MOTOR_PIN, OUTPUT);
+void setupDDNS() {
+  EasyDDNS.service("duckdns");
   
-  IPAddress _ip = IPAddress(192, 168, 5, 20);
-  IPAddress _gw = IPAddress(192, 168, 5, 1);
-  IPAddress _sn = IPAddress(255, 255, 255, 0);
+  EasyDDNS.client(DDNS_NAME, DDNS_TOKEN);
 
-  wifiManager.setAPStaticIPConfig(_ip, _gw, _sn);
+  EasyDDNS.onUpdate([&](const char* oldIP, const char* newIP){
+    Serial.println("EasyDDNS - IP Change Detected: ");
+    Serial.println(newIP);
+  });
+}
 
-  //fetches ssid and pass from eeprom and tries to connect
-  //if it does not connect it starts an access point with the specified name
-  wifiManager.autoConnect("COWS", "cowsgomoo");
-
-  //if you get here you have connected to the WiFi
-  Serial.println("connected...yeey :)");
-
-  Serial.println(WiFi.localIP());
-
-  setupUPnP();
-
-  if (MDNS.begin("esp8266")) {
-    Serial.println(F("MDNS responder started"));
-  }
-
+void setupServer() {
   server.on(UriBraces("/duration={}"), handleDuration);
 
   server.begin();
@@ -88,6 +93,27 @@ void setup() {
   Serial.println(WiFi.localIP());
 }
 
+void setup() {
+
+  pinMode(MOTOR_PIN, INPUT);
+
+  Serial.begin(115200);
+
+  setupWiFi();
+
+  setupDDNS();
+
+  setupUPnP();
+
+  setupServer();
+
+  if (MDNS.begin("cows")) {
+    Serial.println(F("MDNS responder started"));
+  } 
+  EasyDDNS.update(1);
+}
+
 void loop() {
   server.handleClient();
+  EasyDDNS.update(100000);
 }
