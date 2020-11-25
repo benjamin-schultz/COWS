@@ -22,12 +22,16 @@ ESP8266WebServer server(LISTEN_PORT);
 DNSServer dnsServer;
 
 void handleDuration() {
+  if (!server.authenticate(USERNAME, PASSWORD)) {
+    return server.requestAuthentication();
+  }
   
   int duration = server.pathArg(0).toInt();
-  server.send(200, "text/plain", "Watering for " + String(duration) + " seconds");
+  
   digitalWrite(MOTOR_PIN, LOW);
   delay(duration * 1000);
   digitalWrite(MOTOR_PIN, HIGH);
+  server.send(200, "text/plain", "Finished watering!");
 }
 
 void setupWiFi() {
@@ -110,7 +114,6 @@ void setup() {
   setupUPnP();
 
   setupServer();
-
 
   Serial.println(WiFi.hostname());
 
