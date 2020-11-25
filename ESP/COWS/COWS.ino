@@ -1,8 +1,8 @@
 #include <ESP8266WiFi.h>          //https://github.com/esp8266/Arduino
 #include <TinyUPnP.h>
-#include <ESP8266mDNS.h>
-#include <WiFiUdp.h>
 #include <EasyDDNS.h>
+#include <WiFiUdp.h>
+#include "secrets.h"
 
 //needed for library
 #include <DNSServer.h>
@@ -34,6 +34,8 @@ void setupWiFi() {
   //WiFiManager
   //Local intialization. Once its business is done, there is no need to keep it around
   WiFiManager wifiManager;
+  //wifiManager.setHostname("cows-for-yy.duckdns.org");
+  
   delay(5000);
   if (digitalRead(MOTOR_PIN) == 0) { 
     wifiManager.resetSettings();
@@ -46,6 +48,8 @@ void setupWiFi() {
   IPAddress _sn = IPAddress(255, 255, 255, 0);
 
   wifiManager.setAPStaticIPConfig(_ip, _gw, _sn);
+
+
 
   //fetches ssid and pass from eeprom and tries to connect
   //if it does not connect it starts an access point with the specified name
@@ -107,9 +111,9 @@ void setup() {
 
   setupServer();
 
-  if (MDNS.begin("cows")) {
-    Serial.println(F("MDNS responder started"));
-  } 
+
+  Serial.println(WiFi.hostname());
+
   EasyDDNS.update(1);
 }
 
