@@ -20,4 +20,8 @@
     <string name="gateway_address">0.0.0.0</string>
     <string name="pref_file">preferences</string>
     <string name="reminder_button">Set Reminder</string>
+    <string name="time">Reminder Time</string>
+    <string name="interval">Reminder Interval</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
 </resources>
