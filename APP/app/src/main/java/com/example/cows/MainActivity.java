@@ -9,6 +9,7 @@ import android.app.Notification;
 import android.app.NotificationChannel;
 import android.app.NotificationManager;
 import android.app.PendingIntent;
+import android.app.TimePickerDialog;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
@@ -19,6 +20,8 @@ import android.text.Editable;
 import android.view.View;
 import android.widget.EditText;
 import android.widget.TextView;
+import android.widget.TimePicker;
+import android.widget.Toast;
 
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
@@ -30,6 +33,8 @@ import com.android.volley.toolbox.Volley;
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
+
+    Calendar datetime;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -69,25 +74,9 @@ public class MainActivity extends AppCompatActivity {
         }
     }
 
-    public void setReminder(View view) {
-        Intent intent = new Intent(this, MainActivity.class);
-        intent.setFlags(Intent.FLAG_ACTIVITY_NEW_TASK | Intent.FLAG_ACTIVITY_CLEAR_TASK);
-        PendingIntent pendingIntent = PendingIntent.getActivity(this, 0, intent, 0);
-
-        NotificationCompat.Builder builder = new NotificationCompat.Builder(this, "TEST")
-                .setSmallIcon(R.drawable.notification_icon)
-                .setContentTitle("textTitle")
-                .setContentText("textContent")
-                .setPriority(NotificationCompat.PRIORITY_DEFAULT)
-                .setContentIntent(pendingIntent)
-                .setAutoCancel(true);
-
-        NotificationManagerCompat notificationManager = NotificationManagerCompat.from(this);
-
-        notificationManager.notify(0, builder.build());
-    }
-
     public void setAlarm(View view) {
+        EditText intervalText = findViewById(R.id.intervalText);
+        int interval = Integer.parseInt(intervalText.getText().toString());
         Calendar cur = Calendar.getInstance();
         cur.add(Calendar.SECOND, 10);
 
@@ -95,7 +84,17 @@ public class MainActivity extends AppCompatActivity {
         int ALARM1_ID = 10000;
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, ALARM1_ID, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(this.ALARM_SERVICE);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cur.getTimeInMillis(), AlarmManager.INTERVAL_DAY, pendingIntent);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cur.getTimeInMillis(), 1000, pendingIntent);
+        Toast.makeText(getApplicationContext(), R.string.reminder_toast, Toast.LENGTH_SHORT).show();
+    }
+
+    public void cancelAlarm(View view) {
+        int ALARM1_ID = 10000;
+        PendingIntent pendingIntent = PendingIntent.getBroadcast(this, ALARM1_ID, new Intent(this, ReminderReceiver.class), PendingIntent.FLAG_NO_CREATE);
+        AlarmManager alarmManager = (AlarmManager) getSystemService(this.ALARM_SERVICE);
+        pendingIntent.cancel();
+        alarmManager.cancel(pendingIntent);
+        Toast.makeText(getApplicationContext(), R.string.cancel_reminder_toast, Toast.LENGTH_SHORT).show();
     }
 
     private void createNotificationChannel() {
@@ -108,6 +107,35 @@ public class MainActivity extends AppCompatActivity {
             NotificationManager notificationManager = getSystemService(NotificationManager.class);
             notificationManager.createNotificationChannel(channel);
         }
+    }
+
+    public void onReminderTimeClick(View view) {
+
+        final Calendar cur = Calendar.getInstance();
+        int mHour = cur.get(Calendar.HOUR_OF_DAY);
+        int mMinute = cur.get(Calendar.MINUTE);
+        TimePickerDialog timePickerDialog = new TimePickerDialog(this,
+                (view1, hourOfDay, minute) -> onTimeSet(view1, hourOfDay, minute), mHour, mMinute, false);
+        timePickerDialog.show();
+    }
+
+    public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
+        EditText reminderTimeText = findViewById(R.id.reminderTimeText);
+        String am_pm = "";
+
+        datetime = Calendar.getInstance();
+        datetime.set(Calendar.HOUR_OF_DAY, hourOfDay);
+        datetime.set(Calendar.MINUTE, minute);
+
+        if (datetime.get(Calendar.AM_PM) == Calendar.AM) {
+            am_pm = "AM";
+        } else if (datetime.get(Calendar.AM_PM) == Calendar.PM) {
+            am_pm = "PM";
+        }
+
+        String strHrsToShow = (datetime.get(Calendar.HOUR) == 0)?"12":datetime.get(Calendar.HOUR)+"";
+
+        reminderTimeText.setText(strHrsToShow+":"+datetime.get(Calendar.MINUTE)+" "+am_pm);
     }
 
     public void startSetup(View view) {
