@@ -15,6 +15,7 @@
 #define LEASE_DURATION 36000
 #define FRIENDLY_NAME "COWS"
 #define MOTOR_PIN 16
+#define LED_PIN 0
 #define DDNS_NAME "cows-for-yy.duckdns.org"
 
 TinyUPnP tinyUPnP(20000);
@@ -41,11 +42,12 @@ void setupWiFi() {
   //wifiManager.setHostname("cows-for-yy.duckdns.org");
   
   delay(5000);
-  pinMode(0, INPUT);
-  if (digitalRead(0) == 0) { 
+  pinMode(LED_PIN, INPUT);
+  if (digitalRead(LED_PIN) == LOW) { 
     wifiManager.resetSettings();
   }
-  pinMode(0, OUTPUT);
+  pinMode(LED_PIN, OUTPUT);
+  digitalWrite(LED_PIN, HIGH);
 
   pinMode(MOTOR_PIN, OUTPUT);
   
@@ -55,7 +57,10 @@ void setupWiFi() {
 
   wifiManager.setAPStaticIPConfig(_ip, _gw, _sn);
 
+  IPAddress sta_ip = IPAddress(192.168.1.250);
+  IPAddress sta_gw = IPAddress(192.168.1.1);
 
+  wifiManager.setSTAStaticIPConfig(sta_ip,sta_gw,_sn);
 
   //fetches ssid and pass from eeprom and tries to connect
   //if it does not connect it starts an access point with the specified name
