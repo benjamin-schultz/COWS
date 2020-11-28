@@ -16,6 +16,7 @@ public final class Constants {
     public static final String NOTIFICATION_ACTION_WATER = "water";
     public static final String NOTIFICATION_ACTION_SNOOZE = "snooze";
 
+    public static final String HTTP_COWS_HOSTNAME = "cows-for-yy.duckdns.org";
     public static final String HTTP_AP_ADDRESS = "http://192.168.5.20/";
     public static final String HTTP_IP_OCT = ".4";
     public static final String HTTP_DEFAULT_IP = "192.168.1.4";

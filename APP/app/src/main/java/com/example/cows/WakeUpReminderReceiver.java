@@ -5,6 +5,7 @@ import android.app.PendingIntent;
 import android.content.BroadcastReceiver;
 import android.content.Context;
 import android.content.Intent;
+import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
 import android.widget.Toast;
 
@@ -15,15 +16,14 @@ public class WakeUpReminderReceiver extends BroadcastReceiver {
     @Override
     public void onReceive(Context context, Intent intent) {
         if (intent.getAction().equals("android.intent.action.BOOT_COMPLETED")) {
-            Toast.makeText(context, "Restart Alarm trigger", Toast.LENGTH_SHORT);
-            //Replace with real code
-            Calendar calendar = Calendar.getInstance();
-            calendar.add(Calendar.SECOND, 10);
+            SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.PREF_FILE, Context.MODE_PRIVATE);
+            int interval = sharedPreferences.getInt(Constants.PREF_REMINDER_INTERVAL, Constants.REMINDER_INTERVAL_DEFAULT);
+            long reminder_time = sharedPreferences.getLong(Constants.PREF_REMINDER_TIME, Constants.REMINDER_TIME_DEFAULT);
 
             Intent myIntent = new Intent(context, ReminderReceiver.class);
             PendingIntent pendingIntent = PendingIntent.getBroadcast(context, Constants.ALARM_ID, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
             AlarmManager alarmManager = (AlarmManager) context.getSystemService(Context.ALARM_SERVICE);
-            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, calendar.getTimeInMillis() , 1000, pendingIntent);
+            alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, reminder_time, AlarmManager.INTERVAL_DAY*interval, pendingIntent);
         }
     }
 }

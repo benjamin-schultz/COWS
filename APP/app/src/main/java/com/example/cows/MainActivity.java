@@ -16,6 +16,7 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.content.pm.PackageManager;
+import android.net.InetAddresses;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -35,11 +36,15 @@ import com.android.volley.toolbox.Volley;
 
 import org.w3c.dom.Text;
 
+import java.net.InetAddress;
+import java.net.UnknownHostException;
 import java.text.SimpleDateFormat;
 import android.util.Base64;
 import java.util.Calendar;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutorService;
+import java.util.concurrent.Executors;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -75,7 +80,6 @@ public class MainActivity extends AppCompatActivity {
         final EditText durationText = (EditText) findViewById(R.id.durationText);
 
         SharedPreferences sharedPref = MainActivity.this.getSharedPreferences(Constants.PREF_FILE,Context.MODE_PRIVATE);
-        String ipAddress = sharedPref.getString(Constants.PREF_IP, Constants.HTTP_DEFAULT_IP);
 
         String duration = durationText.getText().toString();
 
@@ -86,11 +90,20 @@ public class MainActivity extends AppCompatActivity {
         if (duration.equals("")) {
             waterState.setText(getString(R.string.enter_duration));
         } else {
-            water(duration, ipAddress);
+            getPublicIP(duration);
         }
     }
 
-    public void water(String duration, String ipAddress) {
+    public void water(String duration, String ipAddress) throws UnknownHostException {
+        InetAddress COWSaddressInet = InetAddress.getByName(Constants.HTTP_COWS_HOSTNAME);
+        String COWSaddress = COWSaddressInet.getHostAddress();
+        if (COWSaddress.equals(ipAddress)) {
+            SharedPreferences sharedPreferences = MainActivity.this.getSharedPreferences(Constants.PREF_FILE, Context.MODE_PRIVATE);
+            ipAddress = sharedPreferences.getString(Constants.PREF_IP, Constants.HTTP_DEFAULT_IP);
+        } else {
+            ipAddress = Constants.HTTP_COWS_HOSTNAME;
+        }
+
         RequestQueue queue = Volley.newRequestQueue(this);
         String username = BuildConfig.COWS_USERNAME;
         String password = BuildConfig.COWS_PASSWORD;
@@ -124,8 +137,34 @@ public class MainActivity extends AppCompatActivity {
     }
 
     public void setWaterText(String text) {
-        final TextView waterState = findViewById(R.id.wateringStateText);
-        waterState.setText(text);
+        Toast.makeText(this, text, Toast.LENGTH_SHORT);
+    }
+
+    public void getPublicIP(String duration) {
+        RequestQueue queue = Volley.newRequestQueue(this);
+        String url = "https://api.ipify.org/";
+        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
+                new Response.Listener<String>() {
+                    @Override
+                    public void onResponse(String response) {
+                        try {
+                            water(duration, response);
+                        } catch (UnknownHostException e) {
+                            e.printStackTrace();
+                        }
+                    }
+                }, new Response.ErrorListener() {
+            @Override
+            public void onErrorResponse(VolleyError error) {
+                Toast.makeText(MainActivity.this, error.toString(), Toast.LENGTH_SHORT);
+            }
+        });
+
+        queue.add(stringRequest);
+    }
+
+    public void onWaterClick(View view) {
+        NetworkIntentService.startActionFoo(this, "test1", "test2");
     }
 
     public void setAlarm(View view) {

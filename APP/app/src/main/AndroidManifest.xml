@@ -15,7 +15,12 @@
         android:supportsRtl="true"
         android:theme="@style/Theme.COWS"
         android:usesCleartextTraffic="true">
-        <activity android:name=".SetupActivity"
+        <service
+            android:name=".NetworkIntentService"
+            android:exported="false"></service>
+
+        <activity
+            android:name=".SetupActivity"
             android:parentActivityName=".MainActivity">
             <meta-data
                 android:name="android.support.PARENT_ACTIVITY"
@@ -29,15 +34,20 @@
             </intent-filter>
         </activity>
 
-        <receiver android:name=".ReminderReceiver"
+        <receiver
+            android:name=".ReminderReceiver"
             android:enabled="true" />
-        <receiver android:name=".ActionReceiver"
+        <receiver
+            android:name=".ActionReceiver"
             android:enabled="true" />
-        <receiver android:name=".WakeUpReminderReceiver"
+        <receiver
+            android:name=".WakeUpReminderReceiver"
             android:enabled="true">
             <intent-filter>
                 <action android:name="android.intent.action.BOOT_COMPLETED" />
+
                 <category android:name="android.intent.category.DEFAULT" />
+
                 <action android:name="android.intent.action.QUICKBOOT_POWERON" />
             </intent-filter>
         </receiver>
