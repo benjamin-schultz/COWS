@@ -11,9 +11,11 @@ import android.app.NotificationManager;
 import android.app.PendingIntent;
 import android.app.TimePickerDialog;
 import android.content.BroadcastReceiver;
+import android.content.ComponentName;
 import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
+import android.content.pm.PackageManager;
 import android.os.Build;
 import android.os.Bundle;
 import android.text.Editable;
@@ -32,6 +34,7 @@ import com.android.volley.toolbox.Volley;
 
 import org.w3c.dom.Text;
 
+import java.text.SimpleDateFormat;
 import java.util.Calendar;
 
 public class MainActivity extends AppCompatActivity {
@@ -54,7 +57,7 @@ public class MainActivity extends AppCompatActivity {
 
         String duration = durationText.getText().toString();
         if (duration.equals("")) {
-            waterState.setText(getString(R.string.enter_duration);
+            waterState.setText(getString(R.string.enter_duration));
         } else {
             water(duration, ipAddress);
         }
@@ -95,7 +98,18 @@ public class MainActivity extends AppCompatActivity {
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, Constants.ALARM_ID, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(this.ALARM_SERVICE);
         alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cur.getTimeInMillis(), 1000, pendingIntent);
+        enableWakeUpReceiver(true);
         Toast.makeText(getApplicationContext(), R.string.reminder_toast, Toast.LENGTH_SHORT).show();
+    }
+
+    public void enableWakeUpReceiver(boolean enable) {
+        PackageManager pm = this.getPackageManager();
+        ComponentName componentName = new ComponentName(this, WakeUpReminderReceiver.class);
+        if (enable) {
+            pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_ENABLED, PackageManager.DONT_KILL_APP);
+        } else {
+            pm.setComponentEnabledSetting(componentName, PackageManager.COMPONENT_ENABLED_STATE_DISABLED, PackageManager.DONT_KILL_APP);
+        }
     }
 
     public void cancelAlarm(View view) {
@@ -103,6 +117,7 @@ public class MainActivity extends AppCompatActivity {
         AlarmManager alarmManager = (AlarmManager) getSystemService(this.ALARM_SERVICE);
         pendingIntent.cancel();
         alarmManager.cancel(pendingIntent);
+        enableWakeUpReceiver(false);
         Toast.makeText(getApplicationContext(), R.string.cancel_reminder_toast, Toast.LENGTH_SHORT).show();
     }
 
@@ -144,7 +159,10 @@ public class MainActivity extends AppCompatActivity {
 
         String strHrsToShow = (datetime.get(Calendar.HOUR) == 0)?"12":datetime.get(Calendar.HOUR)+"";
 
-        reminderTimeText.setText(strHrsToShow+":"+datetime.get(Calendar.MINUTE)+" "+am_pm);
+        SimpleDateFormat format = new SimpleDateFormat("h:mm a");
+
+        reminderTimeText.setText(format.format(datetime.getTime()));
+        //reminderTimeText.setText(strHrsToShow+":"+datetime.get(Calendar.MINUTE)+" "+am_pm);
     }
 
     public void startSetup(View view) {
