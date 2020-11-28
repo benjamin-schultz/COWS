@@ -14,7 +14,7 @@
 #define LISTEN_PORT 1250
 #define LEASE_DURATION 36000
 #define FRIENDLY_NAME "COWS"
-#define MOTOR_PIN 0
+#define MOTOR_PIN 16
 #define DDNS_NAME "cows-for-yy.duckdns.org"
 
 TinyUPnP tinyUPnP(20000);
@@ -28,9 +28,9 @@ void handleDuration() {
   
   int duration = server.pathArg(0).toInt();
   
-  digitalWrite(MOTOR_PIN, LOW);
-  delay(duration * 1000);
   digitalWrite(MOTOR_PIN, HIGH);
+  delay(duration * 1000);
+  digitalWrite(MOTOR_PIN, LOW);
   server.send(200, "text/plain", "Finished watering!");
 }
 
@@ -41,9 +41,11 @@ void setupWiFi() {
   //wifiManager.setHostname("cows-for-yy.duckdns.org");
   
   delay(5000);
-  if (digitalRead(MOTOR_PIN) == 0) { 
+  pinMode(0, INPUT);
+  if (digitalRead(0) == 0) { 
     wifiManager.resetSettings();
   }
+  pinMode(0, OUTPUT);
 
   pinMode(MOTOR_PIN, OUTPUT);
   
