@@ -16,15 +16,21 @@ public class ReminderReceiver extends BroadcastReceiver {
 
         Intent notificationIntent = new Intent(context, MainActivity.class);
         notificationIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
-        PendingIntent pendingIntent = PendingIntent.getActivity(context, 0, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+        PendingIntent pendingIntent = PendingIntent.getActivity(context, Constants.NOTIFICATION_DEFAULT, notificationIntent, PendingIntent.FLAG_UPDATE_CURRENT);
 
-        NotificationCompat.Builder mNotifyBuilder = new NotificationCompat.Builder(context, "TEST")
+        Intent waterIntent = new Intent(context, ActionReceiver.class);
+        waterIntent.putExtra(Constants.NOTIFICATION_ACTION_NAME, Constants.NOTIFICATION_ACTION_WATER);
+        waterIntent.setFlags(Intent.FLAG_ACTIVITY_CLEAR_TOP);
+        PendingIntent waterPendingIntent = PendingIntent.getBroadcast(context, Constants.NOTIFICATION_WATER, waterIntent, PendingIntent.FLAG_UPDATE_CURRENT);
+
+        NotificationCompat.Builder mNotifyBuilder = new NotificationCompat.Builder(context, Constants.NOTIFICATION_CHANNEL_ID)
                 .setSmallIcon(R.drawable.notification_icon)
-                .setContentTitle("Title")
-                .setContentText("Text")
+                .setContentTitle(context.getString(R.string.notification_title))
+                .setContentText(context.getString(R.string.notification_description))
                 .setAutoCancel(true)
-                .setContentIntent(pendingIntent);
-        notificationManager.notify(0, mNotifyBuilder.build());
+                .setContentIntent(pendingIntent)
+                .addAction(R.drawable.notification_icon, context.getString(R.string.water), waterPendingIntent);
+        notificationManager.notify(Constants.NOTIFICATION_MANAGER_ID, mNotifyBuilder.build());
     }
 }
 

@@ -29,6 +29,8 @@
 
         <receiver android:name=".ReminderReceiver"
             android:enabled="true" />
+        <receiver android:name=".ActionReceiver"
+            android:enabled="true" />
     </application>
 
 </manifest>
