@@ -19,4 +19,20 @@
     <string name="ip_address">0.0.0.0</string>
     <string name="gateway_address">0.0.0.0</string>
     <string name="pref_file">preferences</string>
+    <string name="reminder_button">Set Reminder</string>
+    <string name="time">Time</string>
+    <string name="interval">Interval</string>
+    <!-- TODO: Remove or change this placeholder text -->
+    <string name="hello_blank_fragment">Hello blank fragment</string>
+    <string name="days_at">Days, at</string>
+    <string name="send_reminder">Send a reminder every</string>
+    <string name="reminder_toast">Reminder set!</string>
+    <string name="cancel_reminder">Cancel Reminder</string>
+    <string name="cancel_reminder_toast">Reminder cancelled!</string>
+    <string name="channel_name">COWS Notifications</string>
+    <string name="channel_description">COWS Reminder Notifications</string>
+    <string name="notification_channel_id">COWSNotifications</string>
+    <string name="notification_title">COWS Reminder</string>
+    <string name="notification_description">Babe! Don\'t forget to water your plants!</string>
+    <string name="enter_duration">Please enter a duration!</string>
 </resources>
