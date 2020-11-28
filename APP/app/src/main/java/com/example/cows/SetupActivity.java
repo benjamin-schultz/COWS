@@ -36,23 +36,21 @@ public class SetupActivity extends AppCompatActivity {
         WifiInfo info = wifiManager.getConnectionInfo();
         String ipAddress = Formatter.formatIpAddress(info.getIpAddress());
         String ipFirstThree = ipAddress.substring(0, ipAddress.lastIndexOf("."));
-        newIp = ipFirstThree + ".250";
+        newIp = ipFirstThree + Constants.HTTP_IP_OCT;
         ipText.setText(newIp);
 
         DhcpInfo dhcpInfo = wifiManager.getDhcpInfo();
         String gateway = Formatter.formatIpAddress(dhcpInfo.gateway);
         gatewayText.setText(gateway);
-
-
     }
 
     public void onLogIn(View view) {
         SharedPreferences sharedPref = SetupActivity.this.getSharedPreferences(getString(R.string.pref_file), Context.MODE_PRIVATE);
         SharedPreferences.Editor editor = sharedPref.edit();
-        editor.putString(getString(R.string.ip_address), newIp);
+        editor.putString(Constants.PREF_IP, newIp);
         editor.apply();
 
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse("http://192.168.5.20/"));
+        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.HTTP_AP_ADDRESS));
         startActivity(browserIntent);
     }
 

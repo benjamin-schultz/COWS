@@ -46,16 +46,39 @@ public class MainActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         createNotificationChannel();
+
+        SharedPreferences sharedPref = MainActivity.this.getSharedPreferences(Constants.PREF_FILE, Context.MODE_PRIVATE);
+        String duration = sharedPref.getString(Constants.PREF_DURATION, Constants.DURATION_DEFAULT);
+        int interval = sharedPref.getInt(Constants.PREF_REMINDER_INTERVAL, Constants.REMINDER_INTERVAL_DEFAULT);
+        long reminder_time = sharedPref.getLong(Constants.PREF_REMINDER_TIME, Constants.REMINDER_TIME_DEFAULT);
+        Calendar cal = Calendar.getInstance();
+        cal.setTimeInMillis(reminder_time);
+
+        SimpleDateFormat format = new SimpleDateFormat(Constants.DATE_FORMAT);
+
+        final EditText durationText = findViewById(R.id.durationText);
+        durationText.setText(duration);
+
+        final EditText intervalText = findViewById(R.id.intervalText);
+        intervalText.setText(Integer.toString(interval));
+
+        final EditText reminderTimeText = findViewById(R.id.reminderTimeText);
+        reminderTimeText.setText(format.format(cal.getTime()));
     }
 
     public void sendWater(View view) {
         final TextView waterState = (TextView) findViewById(R.id.wateringStateText);
         final EditText durationText = (EditText) findViewById(R.id.durationText);
 
-        SharedPreferences sharedPref = MainActivity.this.getSharedPreferences(getString(R.string.pref_file),Context.MODE_PRIVATE);
-        String ipAddress = sharedPref.getString(getString(R.string.ip_address), Constants.HTTP_DEFAULT_IP);
+        SharedPreferences sharedPref = MainActivity.this.getSharedPreferences(Constants.PREF_FILE,Context.MODE_PRIVATE);
+        String ipAddress = sharedPref.getString(Constants.PREF_IP, Constants.HTTP_DEFAULT_IP);
 
         String duration = durationText.getText().toString();
+
+        SharedPreferences.Editor editor = sharedPref.edit();
+        editor.putString(Constants.PREF_DURATION, duration);
+        editor.apply();
+
         if (duration.equals("")) {
             waterState.setText(getString(R.string.enter_duration));
         } else {
@@ -91,13 +114,17 @@ public class MainActivity extends AppCompatActivity {
     public void setAlarm(View view) {
         EditText intervalText = findViewById(R.id.intervalText);
         int interval = Integer.parseInt(intervalText.getText().toString());
-        Calendar cur = Calendar.getInstance();
-        cur.add(Calendar.SECOND, 10);
+
+        SharedPreferences sharedPreferences = MainActivity.this.getSharedPreferences(Constants.PREF_FILE, Context.MODE_PRIVATE);
+        SharedPreferences.Editor editor = sharedPreferences.edit();
+        editor.putLong(Constants.PREF_REMINDER_TIME, datetime.getTimeInMillis());
+        editor.putInt(Constants.PREF_REMINDER_INTERVAL, interval);
+        editor.apply();
 
         Intent myIntent = new Intent(this, ReminderReceiver.class);
         PendingIntent pendingIntent = PendingIntent.getBroadcast(this, Constants.ALARM_ID, myIntent, PendingIntent.FLAG_UPDATE_CURRENT);
         AlarmManager alarmManager = (AlarmManager) getSystemService(this.ALARM_SERVICE);
-        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, cur.getTimeInMillis(), 1000, pendingIntent);
+        alarmManager.setRepeating(AlarmManager.RTC_WAKEUP, datetime.getTimeInMillis(), AlarmManager.INTERVAL_DAY*interval, pendingIntent);
         enableWakeUpReceiver(true);
         Toast.makeText(getApplicationContext(), R.string.reminder_toast, Toast.LENGTH_SHORT).show();
     }
@@ -145,24 +172,14 @@ public class MainActivity extends AppCompatActivity {
 
     public void onTimeSet(TimePicker view, int hourOfDay, int minute) {
         EditText reminderTimeText = findViewById(R.id.reminderTimeText);
-        String am_pm = "";
 
         datetime = Calendar.getInstance();
         datetime.set(Calendar.HOUR_OF_DAY, hourOfDay);
         datetime.set(Calendar.MINUTE, minute);
 
-        if (datetime.get(Calendar.AM_PM) == Calendar.AM) {
-            am_pm = "AM";
-        } else if (datetime.get(Calendar.AM_PM) == Calendar.PM) {
-            am_pm = "PM";
-        }
-
-        String strHrsToShow = (datetime.get(Calendar.HOUR) == 0)?"12":datetime.get(Calendar.HOUR)+"";
-
-        SimpleDateFormat format = new SimpleDateFormat("h:mm a");
+        SimpleDateFormat format = new SimpleDateFormat(Constants.DATE_FORMAT);
 
         reminderTimeText.setText(format.format(datetime.getTime()));
-        //reminderTimeText.setText(strHrsToShow+":"+datetime.get(Calendar.MINUTE)+" "+am_pm);
     }
 
     public void startSetup(View view) {
