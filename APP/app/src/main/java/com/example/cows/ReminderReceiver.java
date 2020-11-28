@@ -29,7 +29,7 @@ public class ReminderReceiver extends BroadcastReceiver {
                 .setContentText(context.getString(R.string.notification_description))
                 .setAutoCancel(true)
                 .setContentIntent(pendingIntent)
-                .addAction(R.drawable.notification_icon, context.getString(R.string.water), waterPendingIntent);
+                .addAction(R.drawable.notification_icon, "WATER!", waterPendingIntent);
         notificationManager.notify(Constants.NOTIFICATION_MANAGER_ID, mNotifyBuilder.build());
     }
 }

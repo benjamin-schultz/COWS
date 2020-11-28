@@ -60,7 +60,7 @@ public class NetworkIntentService extends IntentService {
 
     public static void startCompareIP(Context context, String publicIP) {
         Intent intent = new Intent(context, NetworkIntentService.class);
-        intent.setAction(ACTION_GET_PUBLIC_IP);
+        intent.setAction(ACTION_COMPARE_IP);
         intent.putExtra(EXTRA_PUBLIC_IP, publicIP);
         context.startService(intent);
     }
@@ -85,10 +85,12 @@ public class NetworkIntentService extends IntentService {
     private void getPublicIP() {
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = "https://api.ipify.org/";
+        Log.d("DEBUG", "getPublicIP");
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
+                        Log.d("DEBUG", "startCompareIP");
                         startCompareIP(NetworkIntentService.this, response);
                     }
                 }, new Response.ErrorListener() {
