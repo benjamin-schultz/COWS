@@ -25,6 +25,7 @@ import android.widget.TextView;
 import android.widget.TimePicker;
 import android.widget.Toast;
 
+import com.android.volley.AuthFailureError;
 import com.android.volley.Request;
 import com.android.volley.RequestQueue;
 import com.android.volley.Response;
@@ -35,7 +36,10 @@ import com.android.volley.toolbox.Volley;
 import org.w3c.dom.Text;
 
 import java.text.SimpleDateFormat;
+import android.util.Base64;
 import java.util.Calendar;
+import java.util.HashMap;
+import java.util.Map;
 
 public class MainActivity extends AppCompatActivity {
 
@@ -88,6 +92,9 @@ public class MainActivity extends AppCompatActivity {
 
     public void water(String duration, String ipAddress) {
         RequestQueue queue = Volley.newRequestQueue(this);
+        String username = BuildConfig.COWS_USERNAME;
+        String password = BuildConfig.COWS_PASSWORD;
+
         String url = Constants.HTTP_PREFIX + ipAddress + ":" + Constants.HTTP_PORT + "/" + Constants.HTTP_WATER + duration;
 
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
@@ -101,7 +108,17 @@ public class MainActivity extends AppCompatActivity {
             public void onErrorResponse(VolleyError error) {
                 setWaterText(error.toString());
             }
-        });
+
+        }) {
+            @Override
+            public Map<String, String> getHeaders() throws AuthFailureError {
+                HashMap<String, String> params = new HashMap<String, String>();
+                String creds = String.format("%s:%s", username, password);
+                String auth = "Basic " + Base64.encodeToString(creds.getBytes(), Base64.NO_WRAP);
+                params.put("Authorization", auth);
+                return params;
+            }
+        };
 
         queue.add(stringRequest);
     }
