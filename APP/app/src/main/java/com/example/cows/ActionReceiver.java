@@ -40,39 +40,7 @@ public class ActionReceiver extends BroadcastReceiver {
     }
 
     public void water(Context context) {
-        SharedPreferences sharedPreferences = context.getSharedPreferences(Constants.PREF_FILE, Context.MODE_PRIVATE);
-        String ipAddress = sharedPreferences.getString(Constants.PREF_IP, Constants.HTTP_DEFAULT_IP);
-        String duration = sharedPreferences.getString(Constants.PREF_DURATION, Constants.DURATION_DEFAULT);
-
-        String username = BuildConfig.COWS_USERNAME;
-        String password = BuildConfig.COWS_PASSWORD;
-
-        RequestQueue queue = Volley.newRequestQueue(context);
-        String url = Constants.HTTP_PREFIX + ipAddress + ":" + Constants.HTTP_PORT + "/" + Constants.HTTP_WATER + duration;
-
-        StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
-                new Response.Listener<String>() {
-                    @Override
-                    public void onResponse(String response) {
-                        Toast.makeText(context, response, Toast.LENGTH_SHORT);
-                    }
-                }, new Response.ErrorListener() {
-            @Override
-            public void onErrorResponse(VolleyError error) {
-                Toast.makeText(context, error.toString(), Toast.LENGTH_SHORT);
-            }
-        }) {
-            @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
-                HashMap<String, String> params = new HashMap<String, String>();
-                String creds = String.format("%s:%s", username, password);
-                String auth = "Basic " + Base64.encodeToString(creds.getBytes(), Base64.NO_WRAP);
-                params.put("Authorization", auth);
-                return params;
-            }
-        };
-
-        queue.add(stringRequest);
+        NetworkIntentService.startWateringIntent(context);
     }
 
     public void snooze() {

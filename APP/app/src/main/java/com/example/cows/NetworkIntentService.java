@@ -1,11 +1,14 @@
 package com.example.cows;
 
+import android.app.Activity;
 import android.app.DownloadManager;
 import android.app.IntentService;
 import android.content.Intent;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.Debug;
+import android.os.Handler;
+import android.os.Looper;
 import android.util.Base64;
 import android.util.Log;
 import android.widget.Toast;
@@ -40,46 +43,25 @@ import javax.net.ssl.HttpsURLConnection;
  */
 public class NetworkIntentService extends IntentService {
 
-    // TODO: Rename actions, choose action names that describe tasks that this
-    // IntentService can perform, e.g. ACTION_FETCH_NEW_ITEMS
-    private static final String ACTION_FOO = "com.example.cows.action.FOO";
-    private static final String ACTION_BAZ = "com.example.cows.action.BAZ";
+    private static final String ACTION_GET_PUBLIC_IP = "com.example.cows.action.GET_PUBLIC_IP";
+    private static final String ACTION_COMPARE_IP = "com.example.cows.action.COMPARE_IP";
 
-    // TODO: Rename parameters
-    private static final String EXTRA_PARAM1 = "com.example.cows.extra.PARAM1";
-    private static final String EXTRA_PARAM2 = "com.example.cows.extra.PARAM2";
+    private static final String EXTRA_PUBLIC_IP = "com.example.cows.extra.PUBLIC_IP";
 
     public NetworkIntentService() {
         super("NetworkIntentService");
     }
 
-    /**
-     * Starts this service to perform action Foo with the given parameters. If
-     * the service is already performing a task this action will be queued.
-     *
-     * @see IntentService
-     */
-    // TODO: Customize helper method
-    public static void startActionFoo(Context context, String param1, String param2) {
+    public static void startWateringIntent(Context context) {
         Intent intent = new Intent(context, NetworkIntentService.class);
-        intent.setAction(ACTION_FOO);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
+        intent.setAction(ACTION_GET_PUBLIC_IP);
         context.startService(intent);
     }
 
-    /**
-     * Starts this service to perform action Baz with the given parameters. If
-     * the service is already performing a task this action will be queued.
-     *
-     * @see IntentService
-     */
-    // TODO: Customize helper method
-    public static void startActionBaz(Context context, String param1, String param2) {
+    public static void startCompareIP(Context context, String publicIP) {
         Intent intent = new Intent(context, NetworkIntentService.class);
-        intent.setAction(ACTION_BAZ);
-        intent.putExtra(EXTRA_PARAM1, param1);
-        intent.putExtra(EXTRA_PARAM2, param2);
+        intent.setAction(ACTION_GET_PUBLIC_IP);
+        intent.putExtra(EXTRA_PUBLIC_IP, publicIP);
         context.startService(intent);
     }
 
@@ -87,21 +69,12 @@ public class NetworkIntentService extends IntentService {
     protected void onHandleIntent(Intent intent) {
         if (intent != null) {
             final String action = intent.getAction();
-            if (ACTION_FOO.equals(action)) {
-                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
+            if (ACTION_GET_PUBLIC_IP.equals(action)) {
+                getPublicIP();
+            } else if (ACTION_COMPARE_IP.equals(action)) {
+                final String publicIP = intent.getStringExtra(EXTRA_PUBLIC_IP);
                 try {
-                    handleActionFoo(param1, param2);
-                } catch (UnknownHostException e) {
-                    e.printStackTrace();
-                } catch (IOException e) {
-                    e.printStackTrace();
-                }
-            } else if (ACTION_BAZ.equals(action)) {
-                final String param1 = intent.getStringExtra(EXTRA_PARAM1);
-                final String param2 = intent.getStringExtra(EXTRA_PARAM2);
-                try {
-                    handleActionBaz(param1, param2);
+                    compareIPs(publicIP);
                 } catch (UnknownHostException e) {
                     e.printStackTrace();
                 }
@@ -109,23 +82,19 @@ public class NetworkIntentService extends IntentService {
         }
     }
 
-    /**
-     * Handle action Foo in the provided background thread with the provided
-     * parameters.
-     */
-    private void handleActionFoo(String param1, String param2) throws IOException {
+    private void getPublicIP() {
         RequestQueue queue = Volley.newRequestQueue(this);
         String url = "https://api.ipify.org/";
         StringRequest stringRequest = new StringRequest(Request.Method.GET, url,
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        startActionBaz(NetworkIntentService.this, response, "");
+                        startCompareIP(NetworkIntentService.this, response);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(NetworkIntentService.this, error.toString(), Toast.LENGTH_SHORT);
+                showToast(error.toString());
             }
         });
         queue.add(stringRequest);
@@ -162,16 +131,16 @@ public class NetworkIntentService extends IntentService {
                 new Response.Listener<String>() {
                     @Override
                     public void onResponse(String response) {
-                        Toast.makeText(NetworkIntentService.this, response, Toast.LENGTH_SHORT);
+                        showToast(response);
                     }
                 }, new Response.ErrorListener() {
             @Override
             public void onErrorResponse(VolleyError error) {
-                Toast.makeText(NetworkIntentService.this, error.toString(), Toast.LENGTH_SHORT);
+                showToast(error.toString());
             }
         }) {
             @Override
-            public Map<String, String> getHeaders() throws AuthFailureError {
+            public Map<String, String> getHeaders() {
                 HashMap<String, String> params = new HashMap<>();
                 String creds = String.format("%s:%s", username, password);
                 String auth = "Basic " + Base64.encodeToString(creds.getBytes(), Base64.NO_WRAP);
@@ -183,12 +152,12 @@ public class NetworkIntentService extends IntentService {
         queue.add(stringRequest);
     }
 
-    /**
-     * Handle action Baz in the provided background thread with the provided
-     * parameters.
-     */
-    private void handleActionBaz(String param1, String param2) throws UnknownHostException {
-        // TODO: Handle action Baz
-        compareIPs(param1);
+    private void showToast(final String toast) {
+        new Handler(Looper.getMainLooper()).post(new Runnable() {
+            @Override
+            public void run() {
+                Toast.makeText(getApplicationContext(), toast, Toast.LENGTH_SHORT).show();
+            }
+        });
     }
 }
