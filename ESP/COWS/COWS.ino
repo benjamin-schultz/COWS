@@ -22,7 +22,7 @@ ESP8266WebServer server(LISTEN_PORT);
 DNSServer dnsServer;
 
 void handleDuration() {
-  if (!server.authenticate(USERNAME, PASSWORD)) {
+  if (!server.authenticate(COWS_USERNAME, COWS_PASSWORD)) {
     return server.requestAuthentication();
   }
   
