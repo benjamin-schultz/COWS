@@ -28,11 +28,10 @@ void handleDuration() {
   }
   
   int duration = server.pathArg(0).toInt();
-  
+  server.send(200, "text/plain", "Watering!");
   digitalWrite(MOTOR_PIN, HIGH);
   delay(duration * 1000);
   digitalWrite(MOTOR_PIN, LOW);
-  server.send(200, "text/plain", "Finished watering!");
 }
 
 void setupWiFi() {
@@ -57,8 +56,8 @@ void setupWiFi() {
 
   wifiManager.setAPStaticIPConfig(_ip, _gw, _sn);
 
-  IPAddress sta_ip = IPAddress(192.168.1.250);
-  IPAddress sta_gw = IPAddress(192.168.1.1);
+  IPAddress sta_ip = IPAddress(192, 168, 1, 250);
+  IPAddress sta_gw = IPAddress(192, 168, 1, 1);
 
   wifiManager.setSTAStaticIPConfig(sta_ip,sta_gw,_sn);
 

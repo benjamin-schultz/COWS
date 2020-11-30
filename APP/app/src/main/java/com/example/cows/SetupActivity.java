@@ -50,8 +50,8 @@ public class SetupActivity extends AppCompatActivity {
         editor.putString(Constants.PREF_IP, newIp);
         editor.apply();
 
-        Intent browserIntent = new Intent(Intent.ACTION_VIEW, Uri.parse(Constants.HTTP_AP_ADDRESS));
-        startActivity(browserIntent);
+        Intent intent = new Intent(this, LoginWebViewActivity.class);
+        startActivity(intent);
     }
 
     public void onWifiSettings(View view) {

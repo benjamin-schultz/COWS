@@ -37,4 +37,5 @@
     <string name="enter_duration">Please enter a duration!</string>
     <string name="seconds">Seconds</string>
     <string name="water_for">Water for:</string>
+    <string name="wifi_change_failed">Unable to connect to COWS WiFi (try restarting COWS module)</string>
 </resources>
