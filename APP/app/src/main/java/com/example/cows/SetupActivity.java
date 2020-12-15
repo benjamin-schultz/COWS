@@ -6,8 +6,6 @@ import android.content.Context;
 import android.content.Intent;
 import android.content.SharedPreferences;
 import android.net.DhcpInfo;
-import android.net.InetAddresses;
-import android.net.Uri;
 import android.net.wifi.WifiInfo;
 import android.net.wifi.WifiManager;
 import android.os.Bundle;
@@ -16,9 +14,6 @@ import android.text.format.Formatter;
 import android.view.View;
 import android.widget.TextView;
 
-import java.math.BigInteger;
-import java.net.InetAddress;
-import java.text.Format;
 
 public class SetupActivity extends AppCompatActivity {
 
